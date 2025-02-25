@@ -1,0 +1,29 @@
+name: Deploy to Tencent Lighthouse
+on:
+  push:
+    branches: [master]
+jobs:
+  deploy:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate .env
+        run: |
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" > .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" > .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" > .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" > .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" > .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" > .env
+        shell: bash
+
+      - name: Deploy via SSH
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "./*"
+          target: "/var/www/myapp"
