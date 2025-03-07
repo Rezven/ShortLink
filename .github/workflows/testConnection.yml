@@ -20,5 +20,5 @@ jobs:
             nc -zv ${{ secrets.SERVER_PUBLIC_IP }} 22
             
             # 测试 SSH 连接
-            ssh -p ${{ secrets.SSH_PORT }} -i key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "ls -l /data/EZTools/ShortLink"
+            ssh -p ${{ secrets.SSH_PORT }} -i key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "ls -l ~/data/EZTools/ShortLink"
             # ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_PUBLIC_IP }}

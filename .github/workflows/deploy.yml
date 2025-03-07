@@ -6,7 +6,7 @@ on:
       - master  # 触发分支
 
 env:
-  DEPLOY_DIR: /data/EZTools/ShortLink  # 服务器部署路径
+  DEPLOY_DIR: /root/data/EZTools/ShortLink  # 服务器部署路径
 
 jobs:
   deploy:
