@@ -47,7 +47,7 @@ jobs:
 #            node_modules
       - name: Transfer files via rsync
         run: | 
-          rsync -avz -e "ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/id_rsa" \ --exclude=.git \ --exclude=.github \ --exclude=node_modules \ ./ ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_PUBLIC_IP }}:${{ env.DEPLOY_DIR }}/
+          rsync -avz -e "ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/id_ed25519" \ --exclude=.git \ --exclude=.github \ --exclude=node_modules \ ./ ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_PUBLIC_IP }}:${{ env.DEPLOY_DIR }}/
 
       # 步骤4：执行部署命令
       - name: Deploy services
