@@ -18,13 +18,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      # 步骤2：配置SSH密钥
-      - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.7.0
-        with:
-          # 服务器私钥
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
       # 步骤2.1：添加主机密钥到 known_hosts
       - name: Add SSH Server to Known Hosts
         run: |
@@ -33,11 +26,17 @@ jobs:
           ssh-keyscan -p ${{ secrets.SSH_PORT || 22 }} ${{ secrets.SERVER_PUBLIC_IP }} >> ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
 
+      # 步骤2.2：配置SSH密钥
+      - name: Setup SSH
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
       # 步骤3：传输文件到服务器
       - name: Transfer files via rsync
         run: |
           rsync -avz \
-          -e "ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/id_ed25519" \
+          -e "ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/deploy_key" \
           --exclude=.git \
           --exclude=.github \
           --exclude=node_modules \
@@ -76,7 +75,7 @@ jobs:
             
             # 确认docker-compose.yml文件
             ssh -p ${{ secrets.SSH_PORT }} \
-            -i ~/.ssh/id_ed25519 \
+            -i ~/.ssh/deploy_key \
             ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_PUBLIC_IP }} \
             "cd ${{ env.DEPLOY_DIR }} && docker-compose up -d --build"
             
