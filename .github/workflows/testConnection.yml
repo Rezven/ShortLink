@@ -16,8 +16,6 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            echo "连接成功！"
-            exit 0
             # 测试云服务器公网 IP 的 SSH 端口（默认 22）
             nc -zv ${{ secrets.SERVER_PUBLIC_IP }} 22
 
