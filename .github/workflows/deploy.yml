@@ -25,14 +25,22 @@ jobs:
           # 服务器私钥
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+      # 步骤2.1：添加服务器到 known_hosts
+      - name: Add SSH Server to Known Hosts
+        run: |
+          ssh-keyscan -p ${{ secrets.SSH_PORT || 22 }} ${{ secrets.SERVER_PUBLIC_IP }} >> ~/.ssh/known_hosts
+
       # 步骤3：传输文件到服务器
       - name: Rsync deployment files
         uses: burnett01/rsync-deployments@7.0.2
         with:
           switches: -avz --delete
           path: ./
-          remote_path: ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_PUBLIC_IP }}:$DEPLOY_DIR/
-          remote_port: ${{ secrets.SSH_PORT }}
+          remote_host: ${{ secrets.SERVER_PUBLIC_IP }}
+          remote_user: ${{ secrets.SERVER_USERNAME }}
+          remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          remote_port: ${{ secrets.SSH_PORT || 22 }}
+          remote_path: ${{ env.DEPLOY_DIR }}
           exclude: |
             .git
             .github
