@@ -56,10 +56,6 @@ jobs:
             mkdir -p $DEPLOY_DIR/var/lib/{nginx,mysql,redis,rabbitmq}
             mkdir -p $DEPLOY_DIR/backend/src/main/resources/DataBase
             
-            # 同步初始化脚本
-            rsync -avz ./backend/src/main/resources/DataBase/init_scripts.sql \
-            ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_PUBLIC_IP }}:$DEPLOY_DIR/backend/src/main/resources/DataBase/
-            
             # 加载环境变量
             export SERVER_PRIVATE_IP=${{ secrets.SERVER_PRIVATE_IP }}
             export SERVER_PUBLIC_IP=${{ secrets.SERVER_PUBLIC_IP }}
@@ -73,9 +69,13 @@ jobs:
             export RABBITMQ_USERNAME=${{ secrets.SL_RABBITMQ_USERNAME }}
             export RABBITMQ_PASSWORD=${{ secrets.SL_RABBITMQ_PASSWORD }}
             
+            # 同步初始化脚本
+            rsync -avz ./backend/src/main/resources/DataBase/init_scripts.sql \
+            ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_PUBLIC_IP }}:$DEPLOY_DIR/backend/src/main/resources/DataBase/
+            
             # 确认docker-compose.yml文件
             ssh -p ${{ secrets.SSH_PORT }} \
-            -i ~/.ssh/deploy_key \
+            -i ~/.ssh/id_ed25519 \
             ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_PUBLIC_IP }} \
             "cd ${{ env.DEPLOY_DIR }} && docker-compose up -d --build"
             
