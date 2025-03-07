@@ -1,4 +1,4 @@
-- name: Test Server Connectivity
+  name: Test Server Connectivity
   run: |
     # 测试 SSH 端口
     nc -zv 43.139.1.172 22
