@@ -7,3 +7,8 @@
     script: |
       echo "连接成功！"
       exit 0
+      # 测试云服务器公网 IP 的 SSH 端口（默认 22）
+      nc -zv ${{ secrets.SERVER_PUBLIC_IP }} 22
+
+      # 测试 HTTP/HTTPS 端口（如 80/443）
+      nc -zv ${{ secrets.SERVER_PUBLIC_IP }} 80
