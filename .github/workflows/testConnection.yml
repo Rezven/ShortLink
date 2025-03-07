@@ -5,10 +5,15 @@
           branches:
               - master  # 触发分支
 
-  run: |
-    # 测试 SSH 端口
-    nc -zv 43.139.1.172 22
-
-    # 模拟部署命令（如 SCP）
-    # echo "模拟传输测试" && exit 0
-    # 实际命令示例：scp -o StrictHostKeyChecking=no ./file user@43.139.1.172:/path
+  jobs:
+      deploy:
+          steps:
+              - name: test connection
+                with:
+                    script: |
+                        # 测试 SSH 端口
+                        nc -zv 43.139.1.172 22
+    
+                        # 模拟部署命令（如 SCP）
+                        # echo "模拟传输测试" && exit 0
+                        # 实际命令示例：scp -o StrictHostKeyChecking=no ./file user@43.139.1.172:/path
