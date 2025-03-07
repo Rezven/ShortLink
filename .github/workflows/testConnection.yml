@@ -1,4 +1,4 @@
-- name: Test SSH Access
+  name: Test SSH Access
   uses: appleboy/ssh-action@v1.0.0
   with:
     host: ${{ secrets.SERVER_PUBLIC_IP }}
