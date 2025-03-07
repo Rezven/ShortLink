@@ -18,6 +18,6 @@ jobs:
           script: |
             # 测试云服务器公网 IP 的 SSH 端口（默认 22）
             nc -zv ${{ secrets.SERVER_PUBLIC_IP }} 22
-
-            # 测试 HTTP/HTTPS 端口（如 80/443）
-            nc -zv ${{ secrets.SERVER_PUBLIC_IP }} 80
+            
+            # 测试 SSH 连接
+            ssh -p $SSH_PORT ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_PUBLIC_IP }}
