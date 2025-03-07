@@ -61,8 +61,8 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             # 创建必要目录（无需修改权限）
-            mkdir -p $DEPLOY_DIR/var/lib/{nginx,mysql,redis,rabbitmq}
-            mkdir -p $DEPLOY_DIR/backend/src/main/resources/DataBase
+            mkdir -p ${{ env.DEPLOY_DIR }}/var/lib/{nginx,mysql,redis,rabbitmq}
+            mkdir -p ${{ env.DEPLOY_DIR }}/backend/src/main/resources/DataBase
             
             # 加载环境变量
             export SERVER_PRIVATE_IP=${{ secrets.SERVER_PRIVATE_IP }}
@@ -78,11 +78,11 @@ jobs:
             export RABBITMQ_PASSWORD=${{ secrets.SL_RABBITMQ_PASSWORD }}
             
             # 同步初始化脚本
-            rsync -avz $DEPLOY_DIR/backend/src/main/resources/DataBase/init_scripts.sql \
-              $DEPLOY_DIR/backend/src/main/resources/DataBase/
+            rsync -avz ${{ env.DEPLOY_DIR }}/backend/src/main/resources/DataBase/init_scripts.sql \
+              ${{ env.DEPLOY_DIR }}/backend/src/main/resources/DataBase/
             
             # Docker 安全操作
-            cd $DEPLOY_DIR
+            cd ${{ env.DEPLOY_DIR }}
             # 强制清理旧容器和镜像
             docker-compose down --volumes --rmi all
             # 重建服务（避免缓存问题）
