@@ -1,14 +1,25 @@
-  name: Test SSH Access
-  uses: appleboy/ssh-action@v1.0.0
-  with:
-    host: ${{ secrets.SERVER_PUBLIC_IP }}
-    username: ${{ secrets.SERVER_USERNAME }}
-    key: ${{ secrets.SSH_PRIVATE_KEY }}
-    script: |
-      echo "连接成功！"
-      exit 0
-      # 测试云服务器公网 IP 的 SSH 端口（默认 22）
-      nc -zv ${{ secrets.SERVER_PUBLIC_IP }} 22
+name: testConnection
 
-      # 测试 HTTP/HTTPS 端口（如 80/443）
-      nc -zv ${{ secrets.SERVER_PUBLIC_IP }} 80
+on:
+  push:
+    branches:
+      - master  # 触发分支
+
+jobs:
+  deploy:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Test SSH Access
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SERVER_PUBLIC_IP }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "连接成功！"
+            exit 0
+            # 测试云服务器公网 IP 的 SSH 端口（默认 22）
+            nc -zv ${{ secrets.SERVER_PUBLIC_IP }} 22
+
+            # 测试 HTTP/HTTPS 端口（如 80/443）
+            nc -zv ${{ secrets.SERVER_PUBLIC_IP }} 80
