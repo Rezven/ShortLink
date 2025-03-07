@@ -1,0 +1,81 @@
+name: Production Deployment
+
+on:
+  push:
+    branches:
+      - master  # 触发分支
+
+env:
+  DEPLOY_DIR: /data/EZTools/ShortLink  # 服务器部署路径
+
+jobs:
+  deploy:
+    runs-on: ubuntu-22.04
+    steps:
+      # 步骤1：检出代码
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 步骤2：配置SSH密钥
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          # 服务器私钥
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      # 步骤3：传输文件到服务器
+      - name: Rsync deployment files
+        uses: burnett01/rsync-deployments@7.0.2
+        with:
+          switches: -avz --delete
+          path: ./
+          remote_path: ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_PUBLIC_IP }}:$DEPLOY_DIR/
+          remote_port: ${{ secrets.SSH_PORT }}
+          exclude: |
+            .git
+            .github
+            node_modules
+
+      # 步骤4：执行部署命令
+      - name: Deploy services
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SERVER_PUBLIC_IP }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            # 创建必要目录（无需修改权限）
+            mkdir -p $DEPLOY_DIR/var/lib/{nginx,mysql,redis,rabbitmq}
+            mkdir -p $DEPLOY_DIR/backend/src/main/resources/DataBase
+            
+            # 同步初始化脚本
+            rsync -avz ./backend/src/main/resources/DataBase/init_scripts.sql \
+            ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_PUBLIC_IP }}:$DEPLOY_DIR/backend/src/main/resources/DataBase/
+            
+            # 加载环境变量
+            export SERVER_PRIVATE_IP=${{ secrets.SERVER_PRIVATE_IP }}
+            export SERVER_PUBLIC_IP=${{ secrets.SERVER_PUBLIC_IP }}
+            export MYSQL_PORT=${{ secrets.SL_MYSQL_PORT }}
+            export DATABASE_NAME=${{ secrets.SL_DATABASE_NAME }}
+            export DATABASE_USERNAME=${{ secrets.SL_DATABASE_USERNAME }}
+            export DATABASE_PASSWORD=${{ secrets.SL_DATABASE_PASSWORD }}
+            export REDIS_PORT=${{ secrets.SL_REDIS_PORT }}
+            export REDIS_PASSWORD=${{ secrets.SL_REDIS_PASSWORD }}
+            export RABBITMQ_PORT=${{ secrets.SL_RABBITMQ_PORT }}
+            export RABBITMQ_USERNAME=${{ secrets.SL_RABBITMQ_USERNAME }}
+            export RABBITMQ_PASSWORD=${{ secrets.SL_RABBITMQ_PASSWORD }}
+            
+            # 进入部署目录
+            cd $DEPLOY_DIR/
+            
+            # 停止并删除旧容器
+            docker-compose -f docker-compose.yml down
+            
+            # 拉取最新镜像并启动
+            docker-compose -f docker-compose.yml up -d --build --force-recreate
+            
+            # 清理无用镜像
+            docker image prune -af
