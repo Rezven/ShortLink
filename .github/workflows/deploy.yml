@@ -25,30 +25,18 @@ jobs:
           # 服务器私钥
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      # 步骤2.1：添加服务到 known_hosts
+      # 步骤2.1：添加主机密钥到 known_hosts
       - name: Add SSH Server to Known Hosts
         run: |
           mkdir -p ~/.ssh  # 创建 .ssh 目录
           chmod 700 ~/.ssh  # 设置权限
           ssh-keyscan -p ${{ secrets.SSH_PORT || 22 }} ${{ secrets.SERVER_PUBLIC_IP }} >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
 
       # 步骤3：传输文件到服务器
-#      - name: Rsync deployment files
-#        uses: burnett01/rsync-deployments@7.0.2
-#        with:
-#          switches: -avz --delete
-#          path: ./
-#          remote_host: ${{ secrets.SERVER_PUBLIC_IP }}
-#          remote_user: ${{ secrets.SERVER_USERNAME }}
-#          remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
-#          remote_port: ${{ secrets.SSH_PORT || 22 }}
-#          remote_path: ${{ env.DEPLOY_DIR }}
-#          exclude: |
-#            .git
-#            .github
-#            node_modules
       - name: Transfer files via rsync
         run: |
+          chmod 600 ~/.ssh/id_ed25519
           rsync -avz \
           -e "ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/id_ed25519" \
           --exclude=.git \
@@ -56,6 +44,7 @@ jobs:
           --exclude=node_modules \
           ./ \
           ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_PUBLIC_IP }}:${{ env.DEPLOY_DIR }}/
+
       # 步骤4：执行部署命令
       - name: Deploy services
         uses: appleboy/ssh-action@v1.0.0
@@ -85,6 +74,12 @@ jobs:
             export RABBITMQ_PORT=${{ secrets.SL_RABBITMQ_PORT }}
             export RABBITMQ_USERNAME=${{ secrets.SL_RABBITMQ_USERNAME }}
             export RABBITMQ_PASSWORD=${{ secrets.SL_RABBITMQ_PASSWORD }}
+            
+            # 确认docker-compose.yml文件
+            ssh -p ${{ secrets.SSH_PORT }} \
+            -i ~/.ssh/id_ed25519 \
+            ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_PUBLIC_IP }} \
+            "cd ${{ env.DEPLOY_DIR }} && docker-compose up -d --build"
             
             # 进入部署目录
             cd $DEPLOY_DIR/
