@@ -36,25 +36,37 @@ jobs:
           run: |
           rsync -avz \
           -e "ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/deploy_key" \
-          --exclude=.git \
-          --exclude=.github \
-          --exclude=node_modules \
+          --exclude={.git,.github,node_modules} \
           "./" \
           ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_PUBLIC_IP }}:${{ env.DEPLOY_DIR }}/
-#          rsync -avz \
-#          -e "ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
-#          --rsync-path="sudo rsync" \
-#          --delete \
-#          --include="docker-compose.yml" \
-#          --include="backend/" \
-#          --exclude="*" \
-#          "./" \
-#          root@${{ secrets.SERVER_PUBLIC_IP }}:${{ env.DEPLOY_DIR }}/
 
-      # 步骤4：执行部署命令
+      # 步骤4：构建镜像
+      - name: Setup Maven
+        uses: s4u/maven-settings-action@v3
+        with:
+          mirrors: |
+            [{
+              "id": "aliyun",
+              "url": "https://maven.aliyun.com/repository/public",
+              "mirrorOf": "central"
+            }]
+
+        # 步骤5：构建项目
+      - name: Build
+        run: |
+            mvn -B clean package -DskipTests
+
+      # 步骤6：构建镜像
+      - name: Docker Build
+        run: |
+            docker build -f backend/Dockerfile . -t backend:latest
+            docker build -f frontend/Dockerfile . -t frontend:latest
+
+      # 步骤7：执行部署命令
       - name: Deploy services
         uses: appleboy/ssh-action@v1.0.0
         with:
+          timeout-minutes: 30
           host: ${{ secrets.SERVER_PUBLIC_IP }}
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -84,9 +96,13 @@ jobs:
             # Docker 安全操作
             cd ${{ env.DEPLOY_DIR }}
             # 强制清理旧容器和镜像
-            docker-compose down --volumes --rmi all
+            # docker-compose down --volumes --rmi all
+            docker-compose down --volumes --remove-orphans
+            docker-compose pull
+            # maven 加速
+            # mvn clean install -s settings.xml
             # 重建服务（避免缓存问题）
-            docker-compose up -d --build --force-recreate --remove-orphans
+            docker-compose up -d --build --force-recreate
             # 清理无用资源
             docker system prune -af
             docker volume prune -f
