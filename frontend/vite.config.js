@@ -6,11 +6,11 @@ export default defineConfig({
     server: {
         historyApiFallback: true, // 404时自动跳转到 /index.html
         port: 3000, // 指定端口
-        host: 'localhost', // 绑定到本地
+        host: '43.139.1.172', // 绑定到公网ip
         open: true,  // 启动后自动打开浏览器
         proxy: {
             '/api': {
-                target: 'http://localhost:8080',
+                target: 'http://43.139.1.172:8080/',
                 changeOrigin: true,
                 rewrite: (path) => path.replace(/^\/api/, '')
             }
