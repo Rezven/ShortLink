@@ -56,7 +56,7 @@ services:
 
   # Nginx 服务
   nginx:
-    image: nginx:1.24.1
+    image: nginx:latest
     ports:
       - "80:80"
       - "443:443"
