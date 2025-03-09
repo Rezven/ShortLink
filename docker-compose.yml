@@ -13,7 +13,7 @@ services:
   # 前端服务
   frontend:
     build:
-      context: frontend  # 独立前端构建
+      context: ./frontend  # 上下文设为 frontend 目录
       dockerfile: frontend/Dockerfile  # 指定 Dockerfile 路径
     ports:
       - "80:80"
