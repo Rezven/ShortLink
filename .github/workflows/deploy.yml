@@ -47,6 +47,7 @@ jobs:
           mirrors: |
             [{
               "id": "aliyun",
+              "name": "Aliyun Maven",
               "url": "https://maven.aliyun.com/repository/public",
               "mirrorOf": "central"
             }]
