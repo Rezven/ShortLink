@@ -55,7 +55,7 @@ jobs:
         # 步骤5：构建项目
       - name: Build
         run: |
-            cd ${{ env.DEPLOY_DIR }}/backend
+            cd ${{ env.DEPLOY_DIR }}/backend/
             mvn -f pom.xml clean package -DskipTests
 
       # 步骤6：构建镜像
