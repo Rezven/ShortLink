@@ -54,7 +54,14 @@ RUN npm ci --unsafe-perm
 RUN chmod -R 755 node_modules/.bin/vite
 
 COPY frontend .
-RUN npm run build
+# 添加 --unsafe-perm 参数
+RUN npm ci --unsafe-perm --legacy-peer-deps
+# 修复二进制文件权限
+RUN chmod -R 755 node_modules/.bin
+
+# 再次确认构建权限
+RUN chown -R node:node /app && \
+    npm run build
 
 # 阶段2: 后端构建
 # 依赖安装（利用缓存）

@@ -17,15 +17,16 @@ RUN npm cache clean --force && \
 
 # 复制并安装依赖
 COPY package.json package-lock.json ./
-RUN npm config set unsafe-perm true && \
-    npm ci --omit=dev --force --legacy-peer-deps && \
-    chmod -R 755 node_modules
+RUN npm ci --unsafe-perm --legacy-peer-deps
+
+# 修复二进制文件权限
+RUN chmod -R 755 src && \
+    chmod 755 node_modules/.bin/*
 
 # 复制源码并构建
 COPY . .
-RUN chmod -R 755 src && \
-    chmod 755 node_modules/.bin/*
-RUN npm run build
+RUN chown -R node:node /app && \
+    npm run build
 
 # 生产镜像
 FROM nginx:1.25-alpine
