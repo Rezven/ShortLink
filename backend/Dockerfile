@@ -43,10 +43,10 @@ ENV RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
 ENV RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
 
 # 阶段1: 前端构建
-FROM node:20-alpine AS frontend-builder
+FROM node:20-bullseye AS frontend-builder
 WORKDIR /app
 COPY frontend/package*.json ./
-RUN npm ci --silent
+RUN npm ci --unsafe-perm
 COPY frontend .
 RUN npm run build
 

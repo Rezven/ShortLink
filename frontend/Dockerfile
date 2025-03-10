@@ -1,5 +1,5 @@
 # 构建阶段
-FROM node:20-alpine AS builder
+FROM node:20-bullseye AS builder
 
 # 设置容器用户为 root
 USER root
@@ -9,10 +9,10 @@ WORKDIR /app
 
 # 复制并安装依赖
 COPY package*.json package-lock.json ./
-# 允许权限操作
-RUN npm install --unsafe-perm
-# 修正二进制文件权限,确保 vite 可执行
-RUN chmod -R 755 /app/node_modules/.bin
+RUN npm ci --unsafe-perm
+# 修正权限问题,确保 vite 可执行
+RUN chmod -R 777 node_modules/.bin/vite && \
+    chmod -R 777 node_modules/vite/bin/vite.js
 #RUN npm npm ci --omit=dev
 
 # 复制源码并构建
