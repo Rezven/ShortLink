@@ -58,11 +58,11 @@ jobs:
 #            cd ${{ env.DEPLOY_DIR }}/backend/
 #            mvn clean package -DskipTests
 
-      # 步骤6：构建镜像
-      - name: Docker Build
-        run: |
-            docker build -f backend/Dockerfile . -t backend:latest
-            docker build -f frontend/Dockerfile . -t frontend:latest
+#      # 步骤6：构建镜像
+#      - name: Docker Build
+#        run: |
+#            docker build -f backend/Dockerfile . -t backend:latest
+#            docker build -f frontend/Dockerfile . -t frontend:latest
 
       # 步骤7：执行部署命令
       - name: Deploy services
