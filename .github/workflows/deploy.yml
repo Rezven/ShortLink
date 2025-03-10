@@ -11,7 +11,7 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-22.04
-    timeout-minutes: 60
+    timeout-minutes: 180
     steps:
       # 步骤1：检出代码
       - name: Checkout code
@@ -62,12 +62,15 @@ jobs:
 #      # 步骤6：构建镜像
 #      - name: Docker Build
 #        run: |
-#            docker build -f backend/Dockerfile . -t backend:latest
-#            docker build -f frontend/Dockerfile . -t frontend:latest
+            docker buildx create --use  # 启用多平台构建
+            docker buildx build \
+            --cache-from type=gha \
+            --cache-to type=gha,mode=max \
+            -f backend/Dockerfile . -t backend:latest
 
       # 步骤7：执行部署命令
       - name: Deploy services
-        timeout-minutes: 30
+        timeout-minutes: 60
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SERVER_PUBLIC_IP }}
@@ -99,11 +102,14 @@ jobs:
             # Docker 安全操作
             cd ${{ env.DEPLOY_DIR }}
             # 强制清理旧容器和镜像
+            echo "清理旧容器..."
             docker-compose down --volumes --rmi all
-            # docker-compose down --volumes
+            echo "拉取新镜像..."
             docker-compose pull
             # 重建服务（避免缓存问题）
+            echo "启动服务..."
             docker-compose up -d --build --force-recreate --remove-orphans
             # 清理无用资源
+            echo "清理未使用资源..."
             docker system prune -af
             docker volume prune -f

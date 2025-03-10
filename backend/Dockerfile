@@ -62,11 +62,13 @@ FROM maven:3.9.6-eclipse-temurin-21-alpine AS backend-builder
 WORKDIR /app
 COPY backend/pom.xml .
 RUN mvn dependency:go-offline -B
+RUN mkdir -p /root/.m2
+COPY backend/settings.xml /root/.m2/
 
 # 源码构建
 COPY backend/src ./src
 COPY --from=frontend-builder /app/dist ./src/main/resources/static
-RUN mvn package -DskipTests
+RUN mvn package -DskipTests -s settings.xml -Dmaven.wagon.http.readTimeout=120000 -Dmaven.wagon.http.socketTimeout=120000
 
 # 阶段3: 最终镜像
 FROM eclipse-temurin:21-jre-alpine
