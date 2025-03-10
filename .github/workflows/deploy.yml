@@ -40,17 +40,17 @@ jobs:
           "./" \
           ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_PUBLIC_IP }}:${{ env.DEPLOY_DIR }}/
 
-      # 步骤4：构建镜像
-      - name: Setup Maven
-        uses: s4u/maven-settings-action@v3.1.0
-        with:
-          mirrors: |
-            [{
-              "id": "aliyun",
-              "name": "Aliyun Maven",
-              "url": "https://maven.aliyun.com/repository/public",
-              "mirrorOf": "central"
-            }]
+#      # 步骤4：构建镜像
+#      - name: Setup Maven
+#        uses: s4u/maven-settings-action@v3.1.0
+#        with:
+#          mirrors: |
+#            [{
+#              "id": "aliyun",
+#              "name": "AliYun",
+#              "url": "https://maven.aliyun.com/repository/public",
+#              "mirrorOf": "central"
+#            }]
 
 #        # 步骤5：构建项目
 #      - name: Build
@@ -98,13 +98,11 @@ jobs:
             # Docker 安全操作
             cd ${{ env.DEPLOY_DIR }}
             # 强制清理旧容器和镜像
-            # docker-compose down --volumes --rmi all
-            docker-compose down --volumes --remove-orphans
+            docker-compose down --volumes --rmi all
+            # docker-compose down --volumes
             docker-compose pull
-            # maven 加速
-            # mvn clean install -s settings.xml
             # 重建服务（避免缓存问题）
-            docker-compose up -d --build --force-recreate
+            docker-compose up -d --build --force-recreate --remove-orphans
             # 清理无用资源
             docker system prune -af
             docker volume prune -f

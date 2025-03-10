@@ -20,6 +20,14 @@
         <license/>
     </licenses>
 
+    <repositories>
+        <repository>
+            <id>aliyun</id>
+            <name>AliYun</name>
+            <url>https://maven.aliyun.com/repository/public</url>
+        </repository>
+    </repositories>
+
     <properties>
         <java.version>21</java.version>
         <hutool.version>5.8.24</hutool.version>
