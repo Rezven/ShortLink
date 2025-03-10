@@ -11,8 +11,7 @@ WORKDIR /app
 COPY package*.json package-lock.json ./
 RUN npm ci --unsafe-perm
 # 修正权限问题,确保 vite 可执行
-RUN chmod -R 755 node_modules/.bin/vite && \
-#RUN npm npm ci --omit=dev
+RUN chmod -R 755 node_modules/.bin/vite
 
 # 复制源码并构建
 COPY . .

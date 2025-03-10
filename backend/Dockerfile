@@ -51,7 +51,7 @@ WORKDIR /app
 COPY frontend/package*.json ./
 RUN npm ci --unsafe-perm
 # 修正权限问题,确保 vite 可执行
-RUN chmod -R 755 node_modules/.bin/vite && \
+RUN chmod -R 755 node_modules/.bin/vite
 
 COPY frontend .
 RUN npm run build
