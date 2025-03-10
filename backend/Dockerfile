@@ -46,13 +46,12 @@ ENV RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
 FROM node:20-bullseye AS frontend-builder
 
 WORKDIR /app
-COPY frontend/package*.json ./
 
+# 复制并安装依赖
+COPY frontend/package*.json ./
 RUN npm ci --unsafe-perm
-chmod -R 755 node_modules/.bin/vite
 # 修正权限问题,确保 vite 可执行
-chmod -R 777 node_modules/.bin/vite && \
-chmod -R 777 node_modules/vite/bin/vite.js \
+RUN chmod -R 755 node_modules/.bin/vite && \
 
 COPY frontend .
 RUN npm run build
