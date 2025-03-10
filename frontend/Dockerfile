@@ -1,5 +1,5 @@
 # 构建阶段
-FROM registry.cn-hangzhou.aliyuncs.com/library/node:20-bullseye AS builder
+FROM node:20-bullseye-slim AS builder
 
 # 设置容器用户为 root
 USER root

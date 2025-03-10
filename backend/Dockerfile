@@ -43,7 +43,7 @@ ENV RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
 ENV RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
 
 # 阶段1: 前端构建
-FROM registry.cn-hangzhou.aliyuncs.com/library/node:20-bullseye AS frontend-builder
+FROM node:20-bullseye-slim AS frontend-builder
 
 WORKDIR /app
 
