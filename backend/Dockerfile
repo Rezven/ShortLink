@@ -57,10 +57,13 @@ COPY frontend .
 RUN npm run build
 
 # 阶段2: 后端构建
+# 依赖安装（利用缓存）
 FROM maven:3.9.6-eclipse-temurin-21-alpine AS backend-builder
 WORKDIR /app
 COPY backend/pom.xml .
 RUN mvn dependency:go-offline -B
+
+# 源码构建
 COPY backend/src ./src
 COPY --from=frontend-builder /app/dist ./src/main/resources/static
 RUN mvn package -DskipTests
