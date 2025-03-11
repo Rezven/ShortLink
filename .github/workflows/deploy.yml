@@ -50,8 +50,8 @@ jobs:
       # 步骤6：构建镜像
       - name: Docker Build
         run: |
-            docker buildx create -t backend:latest -f ${{ env.DEPLOY_DIR }}/backend/Dockerfile 
-            docker buildx create -t frontend:latest -f ${{ env.DEPLOY_DIR }}/frontend/Dockerfile
+            docker buildx build -t backend:latest -f ${{ env.DEPLOY_DIR }}/backend/Dockerfile 
+            docker buildx build -t frontend:latest -f ${{ env.DEPLOY_DIR }}/frontend/Dockerfile
             docker buildx build \
             --cache-from type=gha \
             --cache-to type=gha,mode=max \
