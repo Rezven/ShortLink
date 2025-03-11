@@ -47,7 +47,7 @@ jobs:
 #            cd ${{ env.DEPLOY_DIR }}/backend/
 #            mvn clean package -DskipTests
 
-#      # 步骤6：构建镜像
+      # 步骤6：构建镜像
       - name: Docker Build
         run: |
             docker buildx create --use  # 启用多平台构建
@@ -55,6 +55,7 @@ jobs:
             --cache-from type=gha \
             --cache-to type=gha,mode=max \
             -f backend/Dockerfile . -t backend:latest
+            --push
 
       # 步骤7：执行部署命令
       - name: Deploy services
@@ -90,8 +91,8 @@ jobs:
             # Docker 安全操作
             cd ${{ env.DEPLOY_DIR }}
             # 强制清理旧容器和镜像
-            echo "清理旧容器..."
-            docker-compose down --volumes --rmi all
+            # echo "清理旧容器..."
+            # docker-compose down --volumes --rmi all
             echo "拉取新镜像..."
             docker-compose pull
             # 重建服务（避免缓存问题）
