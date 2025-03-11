@@ -50,13 +50,16 @@ jobs:
       # 步骤6：构建镜像
       - name: Docker Build
         run: |
-            docker buildx build \
-            --cache-from type=gha \
-            --cache-to type=gha,mode=max \
-            -f backend/Dockerfile . -t backend:latest \
-            --push .
+          docker buildx create --use
+          docker buildx build \
+          --cache-from type=gha \
+          --cache-to type=gha,mode=max \
+          -f backend/Dockerfile \
+          -t backend:latest \
+          --push \
+          .
 
-      # 步骤7：执行部署命令
+    # 步骤7：执行部署命令
       - name: Deploy services
         timeout-minutes: 60
         uses: appleboy/ssh-action@v1.0.0
