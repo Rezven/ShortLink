@@ -54,8 +54,8 @@ jobs:
             docker buildx build \
             --cache-from type=gha \
             --cache-to type=gha,mode=max \
-            -f backend/Dockerfile . -t backend:latest
-            --push
+            -f backend/Dockerfile . -t backend:latest \
+            --push .
 
       # 步骤7：执行部署命令
       - name: Deploy services
