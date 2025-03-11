@@ -50,7 +50,8 @@ jobs:
       # 步骤6：构建镜像
       - name: Docker Build
         run: |
-            docker buildx create --use  # 启用多平台构建
+            docker buildx create -t backend:latest -f ${{ env.DEPLOY_DIR }}/backend/Dockerfile 
+            docker buildx create -t frontend:latest -f ${{ env.DEPLOY_DIR }}/frontend/Dockerfile
             docker buildx build \
             --cache-from type=gha \
             --cache-to type=gha,mode=max \
