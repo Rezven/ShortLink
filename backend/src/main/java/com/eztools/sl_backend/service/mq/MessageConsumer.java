@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MessageConsumer {
     private final ShortLinkRepository repository;
     
-    @Transacstional
+    @Transactional
     @RabbitListener(queues = "${mq.expire-queue}")
     public void handleExpireMessage(String shortCode) {
         repository.markAsExpired(shortCode);
