@@ -75,7 +75,7 @@ COPY backend/settings.xml /root/.m2/
 # 源码构建
 COPY backend/src ./src
 COPY --from=frontend-builder /app/dist ./src/main/resources/static
-RUN mvn package -DskipTests -s settings.xml -Dmaven.wagon.http.readTimeout=120000 -Dmaven.wagon.http.socketTimeout=120000
+RUN mvn package -DskipTests -s /root/.m2/settings.xml
 
 # 阶段3: 最终镜像
 FROM eclipse-temurin:21-jre-alpine
