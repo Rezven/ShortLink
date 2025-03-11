@@ -50,7 +50,7 @@ jobs:
       # 步骤6：构建镜像
       - name: Docker Build
         run: |
-            docker buildx create --use
+#            docker buildx create --use
             docker buildx build \
             --cache-from type=gha \
             --cache-to type=gha,mode=max \
