@@ -1,0 +1,106 @@
+name: Production Deployment
+
+on:
+  push:
+    branches:
+      - master  # 触发分支
+
+env:
+  DEPLOY_DIR: /data/EZTools/ShortLink  # 服务器部署路径
+
+jobs:
+  deploy:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 180
+    steps:
+      # 步骤1：检出代码
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 步骤2：预配置 SSH 环境
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          # 强制添加服务器指纹（绕过首次确认）
+          ssh-keyscan -p ${{ secrets.SSH_PORT || 22 }} ${{ secrets.SERVER_PUBLIC_IP }} >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+          # 写入私钥并设置严格权限
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+      # 步骤3：安全传输文件
+      - name: Transfer files via rsync
+        run: |
+          run: |
+          rsync -avz \
+          -e "ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/deploy_key" \
+          --exclude={.git,.github,node_modules} \
+          "./" \
+          ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_PUBLIC_IP }}:${{ env.DEPLOY_DIR }}/
+
+#        # 步骤5：构建项目
+#      - name: Build
+#        run: |
+#            cd ${{ env.DEPLOY_DIR }}/backend/
+#            mvn clean package -DskipTests
+
+      # 步骤6：构建镜像
+      - name: Docker Build
+        run: |
+          docker buildx create --use
+          docker buildx build \
+          --cache-from type=gha \
+          --cache-to type=gha,mode=max \
+          -f backend/Dockerfile \
+          -t backend:latest \
+          --push \
+          .
+
+    # 步骤7：执行部署命令
+      - name: Deploy services
+        timeout-minutes: 60
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SERVER_PUBLIC_IP }}
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            # 创建必要目录（无需修改权限）
+            mkdir -p ${{ env.DEPLOY_DIR }}/var/lib/{nginx,mysql,redis,rabbitmq}
+            mkdir -p ${{ env.DEPLOY_DIR }}/backend/src/main/resources/DataBase
+            
+            # 加载环境变量
+            export SERVER_PRIVATE_IP=${{ secrets.SERVER_PRIVATE_IP }}
+            export SERVER_PUBLIC_IP=${{ secrets.SERVER_PUBLIC_IP }}
+            export MYSQL_PORT=${{ secrets.SL_MYSQL_PORT }}
+            export DATABASE_NAME=${{ secrets.SL_DATABASE_NAME }}
+            export DATABASE_USERNAME=${{ secrets.SL_DATABASE_USERNAME }}
+            export DATABASE_PASSWORD=${{ secrets.SL_DATABASE_PASSWORD }}
+            export REDIS_PORT=${{ secrets.SL_REDIS_PORT }}
+            export REDIS_PASSWORD=${{ secrets.SL_REDIS_PASSWORD }}
+            export RABBITMQ_PORT=${{ secrets.SL_RABBITMQ_PORT }}
+            export RABBITMQ_USERNAME=${{ secrets.SL_RABBITMQ_USERNAME }}
+            export RABBITMQ_PASSWORD=${{ secrets.SL_RABBITMQ_PASSWORD }}
+            
+            # 同步初始化脚本
+            rsync -avz ${{ env.DEPLOY_DIR }}/backend/src/main/resources/DataBase/init_scripts.sql \
+              ${{ env.DEPLOY_DIR }}/backend/src/main/resources/DataBase/
+            
+            # Docker 安全操作
+            cd ${{ env.DEPLOY_DIR }}
+            # 强制清理旧容器和镜像
+            # echo "清理旧容器..."
+            # docker-compose down --volumes --rmi all
+            echo "拉取新镜像..."
+            docker-compose pull
+            # 重建服务（避免缓存问题）
+            echo "启动服务..."
+            docker-compose up -d --build --force-recreate --remove-orphans
+            # 清理无用资源
+            echo "清理未使用资源..."
+            docker system prune -af
+            docker volume prune -f
