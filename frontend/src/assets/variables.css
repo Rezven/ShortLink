@@ -1,0 +1,8 @@
+:root {
+    /* 浅绿色主题 */
+    --color-primary: #88d8b0;      /* 主色调 */
+    --color-primary-light: #c8f7dc; /* 浅色 */
+    --color-text: #2c3e50;         /* 主要文字颜色 */
+    --color-bg: #f8fff9;           /* 背景色 */
+    --color-border: #e0f0e5;       /* 边框色 */
+}
